@@ -5,8 +5,8 @@ import {protectRoute} from '../middleware/auth.middleware.js';
 const router= express.Router();
 
 
-router.get("/getchannel/:serverId",protectRoute,getChannel);
+router.get("/getchannel/:categoryId",protectRoute,getChannel);
 
-router.post("/addchannel/:serverId",protectRoute,addChannel);
+router.post("/addchannel/:categoryId",protectRoute,addChannel);
 
 export default router;

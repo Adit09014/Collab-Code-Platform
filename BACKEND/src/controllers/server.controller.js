@@ -1,6 +1,8 @@
 import User from "../models/user.js";
 import Server from "../models/server.model.js";
+import Channel from "../models/channel.model.js";
 import cloudinary from "../lib/cloudnary.js";
+import Category from "../models/category.model.js";
 
 export const addServer = async (req, res) => {
     const { name, description } = req.body;
@@ -24,12 +26,16 @@ export const addServer = async (req, res) => {
 
         await newServer.save();
 
+        // create categories first
+        const textCategory = await Category.create({ name: "Text Channel", server: newServer._id });
+        const voiceCategory = await Category.create({ name: "Voice Channel", server: newServer._id });
+
         const defaultChannels = [
-            {name: "general",type: "text",server: server._id},
-            {name:"general",type: "voice", server: server._id}
+            { name: "general", type: "text", category: textCategory._id },
+            { name: "general", type: "voice", category: voiceCategory._id }
         ];
 
-        await Channel.insertMany(defaultChannels);
+        await Channel.insertMany(defaultChannels.map(ch => ({ ...ch, server: newServer._id })));
 
         res.status(201).json({
             _id: newServer._id,

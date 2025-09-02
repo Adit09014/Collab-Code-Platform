@@ -4,16 +4,16 @@ import toast from 'react-hot-toast';
 
 
 export const useChannelStore= create((set,get)=>({
-    channel:[],
+    channels:[],
     name:null,
     server:null,
 
 
 
-    getChannels: async (serverId) =>{
+    getChannels: async (categoryId) =>{
         try{
-            const res= await axiosInstance.get(`/channel/getchannel/${serverId}`);
-            set({channel:res.data});
+            const res= await axiosInstance.get(`/channel/getchannel/${categoryId}`);
+            set({channels:res.data});
             toast.success("Fetched the channel");
         }
         catch(err){
@@ -22,10 +22,10 @@ export const useChannelStore= create((set,get)=>({
         }
     },
 
-    addChannel: async(data)=>{
+    addChannel: async(categoryId,data)=>{
         try{
-            const res= await axiosInstance.post("/channel/addChannel",data);
-            set({channel: res.data});
+            const res= await axiosInstance.post(`/channel/addChannel/${categoryId}`,data);
+            set(state => ({ channels: [...state.channels, res.data] }));
             toast.success("Added Channel Succesfully.");
         }
         catch(err){

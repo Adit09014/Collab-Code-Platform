@@ -5,6 +5,7 @@ import authRoutes from './routes/auth.route.js'
 import messageRoutes from './routes/message.route.js'
 import serverRoutes from './routes/server.route.js'
 import channelRoutes from './routes/channel.route.js'
+import categoryRoutes from './routes/category.route.js'
 import {connectDB} from './lib/db.js'
 import cors from 'cors'
 
@@ -26,6 +27,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/message",messageRoutes)
 app.use("/api/server",serverRoutes)
 app.use("/api/channel",channelRoutes)
+app.use("/api/category",categoryRoutes)
 
 app.listen(PORT, () => {
     console.log("Server is running on port " + PORT);

@@ -4,6 +4,7 @@ import {useAuthStore} from '../store/useAuthStore.js';
 import {useServerStore} from '../store/useServerStore.js' 
 import { useEffect } from 'react';
 import { useChannelStore } from '../store/useChannelStore.js';
+import {useCategoryStore} from '../store/useCategoryStore.js';
 
 const Sidebar=()=>{
     const [selectedServer,setSelectedServer]=useState(null);
@@ -15,6 +16,8 @@ const Sidebar=()=>{
     const [addServerModal,setAddServerModal]=useState(false);
     const {channel,getChannels,addChannel} = useChannelStore();
     const [activeServer,setActiveServer]=useState(null);
+    const {categories,getCategory,addCategory}= useCategoryStore();
+
 
     useEffect(()=>{
         getServers()
@@ -22,7 +25,7 @@ const Sidebar=()=>{
 
     useEffect(() => {
         if (activeServer?._id) {
-            getChannels(activeServer._id); 
+            getCategory(activeServer._id); 
         }
     }, [activeServer]);
 
@@ -99,11 +102,11 @@ const Sidebar=()=>{
                     <h2 className='text-lg font-semibold text-white'>{activeServer?.name || 'Direct Message'}</h2>
                 </div>
                 <div className="flex-1 overflow-y-auto pt-2">
-                {channel?.map(ch=>(
-                    <div key={ch._id}
+                {categories?.map(cat=>(
+                    <div key={cat._id}
                         className='flex items-center px-2 py-1.5 mx-2 rounded cursor-pointer transition-colors group' 
                         >
-                            <span className="text-white font-semibold text-sm">{ch.name}</span>
+                            <span className="text-white font-semibold text-sm">{cat.name}</span>
                     </div>
                 ))}
             </div>

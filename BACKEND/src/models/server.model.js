@@ -29,10 +29,6 @@ const serverSchema= new mongoose.Schema({
             default: 'member'
         }]
     }],
-    channels:[{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:"Channel"
-    }],
     roles:[{
         name:{
             type: String,

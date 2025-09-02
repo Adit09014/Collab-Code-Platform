@@ -1,68 +1,76 @@
 import mongoose from "mongoose";
 import Channel from "../models/channel.model.js";
+import Category from "../models/category.model.js";
 import Server from "../models/server.model.js";
 
-export const getChannel= async (req,res)=>{
-    try{
-        const userId= req.user._id;
-        const {serverId} = req.params;
+export const getChannel = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { categoryId } = req.params;
 
-        const server= await Server.findOne({
-            _id:serverId,
-            "members.user":userId
-        })
-
-        if(!server){
-            return res.status(403).json({message: "You are not a member of the Server."});
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({ message: "Category not found" });
         }
 
-        const channels= await Channel.find({server: serverId});
+        const server = await Server.findOne({
+            _id: category.server,
+            "members.user": userId
+        });
+        if (!server) {
+            return res.status(403).json({ message: "You are not a member of this server." });
+        }
 
+        const channels = await Channel.find({ category: categoryId });
         res.status(200).json(channels);
-    }
-    catch(err){
-        console.log("Error in getChannel",err.message);
-        res.status(500).json({message: "Internal Server Error."})
-    }
-}
 
-export const addChannel= async (req,res)=>{
-    const {name,type}=req.body;
-    const {serverId}=req.params;
+    } catch (err) {
+        console.log("Error in getChannel", err.message);
+        res.status(500).json({ message: "Internal Server Error." });
+    }
+};
 
-    try{
+export const addChannel = async (req, res) => {
+    const { name, type } = req.body;
+    const { categoryId } = req.params;
+
+    try {
         if (!name) {
             return res.status(400).json({ message: "Name is required." });
         }
 
-        if (!mongoose.Types.ObjectId.isValid(serverId)) {
-            return res.status(400).json({ message: "Invalid serverId." });
+        if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+            return res.status(400).json({ message: "Invalid categoryId." });
         }
 
-        const server = await Server.findById(serverId);
-        const userId= req.user._id;
-        const isOwner = server.owner.toString() === userId.toString();
-        if (!isOwner) {
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({ message: "Category not found" });
+        }
+
+        const server = await Server.findById(category.server);
+        const userId = req.user._id;
+        if (server.owner.toString() !== userId.toString()) {
             return res.status(403).json({ message: "Only server owner can create channels." });
         }
 
-        const newChannel= new Channel({
+        const newChannel = new Channel({
             name,
             type,
-            server: serverId
-        })
+            category: categoryId
+        });
 
         await newChannel.save();
 
-        res.status(200).json({
+        res.status(201).json({
             _id: newChannel._id,
             name: newChannel.name,
             type: newChannel.type,
-            server: newChannel.server
-        })
-    }
-    catch(err){
+            category: newChannel.category
+        });
+
+    } catch (err) {
         console.log("Error in addChannel", err.message);
         res.status(500).json({ message: "Internal Server Error." });
     }
-}
+};

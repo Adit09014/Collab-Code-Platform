@@ -11,10 +11,9 @@ const channelSchema = new mongoose.Schema({
         enum: ['text','voice'],
         required: true
     },
-
-    server:{
+    category:{
         type:mongoose.Schema.Types.ObjectId,
-        ref: 'Server',
+        ref:"Category",
         required: true
     }
 });

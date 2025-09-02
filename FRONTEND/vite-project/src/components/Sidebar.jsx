@@ -14,7 +14,7 @@ const Sidebar=()=>{
 
     const {servers, getServers,addServer} = useServerStore();
     const [addServerModal,setAddServerModal]=useState(false);
-    const {channel,getChannels,addChannel} = useChannelStore();
+    const {channels,getChannels,addChannel} = useChannelStore();
     const [activeServer,setActiveServer]=useState(null);
     const {categories,getCategory,addCategory}= useCategoryStore();
 
@@ -25,9 +25,15 @@ const Sidebar=()=>{
 
     useEffect(() => {
         if (activeServer?._id) {
-            getCategory(activeServer._id); 
+            getCategory(activeServer._id)
         }
     }, [activeServer]);
+
+    useEffect(() => {
+    categories?.forEach(cat => {
+      getChannels(cat._id); 
+    });
+  }, [categories]);
 
 
     const handleAddServer= async ()=>{
@@ -46,6 +52,30 @@ const Sidebar=()=>{
     const handleServerSwitch=(server)=>{
         setActiveServer(server);
     }
+
+    const CategoryHeader = ({ category }) => (
+        <div className="flex items-center justify-between px-2 py-2 mx-2 mt-4">
+        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+            {category}
+        </span>
+        <Plus
+            className="w-4 h-4 text-gray-400 hover:text-gray-200 cursor-pointer"
+        />
+        </div>
+    );
+
+const ChannelItem = ({ channel }) => (
+    <div
+      className={'flex items-center px-2 py-1.5 mx-2 rounded cursor-pointer transition-colors group bg-gray-600 text-white'}
+    >
+      {channel.type === 'text' ? (
+        <Hash className="w-4 h-4 mr-2" />
+      ) : (
+        <Volume2 className="w-4 h-4 mr-2" />
+      )}
+      <span className="text-sm truncate">{channel.name}</span>
+    </div>
+  );
 
     return(
         <div className='flex h-screen'>
@@ -103,10 +133,11 @@ const Sidebar=()=>{
                 </div>
                 <div className="flex-1 overflow-y-auto pt-2">
                 {categories?.map(cat=>(
-                    <div key={cat._id}
-                        className='flex items-center px-2 py-1.5 mx-2 rounded cursor-pointer transition-colors group' 
-                        >
-                            <span className="text-white font-semibold text-sm">{cat.name}</span>
+                    <div key={cat._id} >
+                            <CategoryHeader category ={cat.name}/>
+                            {channels[cat._id]?.map(ch=>(
+                                    <ChannelItem key={ch._id} channel={ch}/>
+                            ))}
                     </div>
                 ))}
             </div>

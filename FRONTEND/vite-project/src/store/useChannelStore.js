@@ -27,8 +27,7 @@ export const useChannelStore = create((set, get) => ({
 
     addChannel: async (categoryId, data) => {
         try {
-            const res = await axiosInstance.post(`/channel/addChannel/${categoryId}`, data);
-            
+            const res = await axiosInstance.post(`/channel/addchannel/${categoryId}`,data);
             set(state => ({
                 channels: {
                     ...state.channels,
@@ -41,6 +40,7 @@ export const useChannelStore = create((set, get) => ({
             
             toast.success("Added Channel Successfully.");
         } catch (err) {
+            console.log(err);
             toast.error(err.response?.data?.message || "Something went wrong adding channel");
         }
     },

@@ -48,11 +48,7 @@ export const addChannel = async (req, res) => {
             return res.status(404).json({ message: "Category not found" });
         }
 
-        const server = await Server.findById(category.server);
-        const userId = req.user._id;
-        if (server.owner.toString() !== userId.toString()) {
-            return res.status(403).json({ message: "Only server owner can create channels." });
-        }
+        
 
         const newChannel = new Channel({
             name,

@@ -1,5 +1,5 @@
 import React,{useState} from 'react';
-import { Hash, Volume2, Plus, Settings, Mic, MicOff, Headphones, PlusIcon } from 'lucide-react';
+import { Hash, Volume2, Plus, Settings, Mic, MicOff, Headphones, PlusIcon, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import {useAuthStore} from '../store/useAuthStore.js';
 import {useServerStore} from '../store/useServerStore.js' 
 import { useEffect } from 'react';
@@ -7,17 +7,19 @@ import { useChannelStore } from '../store/useChannelStore.js';
 import {useCategoryStore} from '../store/useCategoryStore.js';
 
 const Sidebar=()=>{
-    const [selectedServer,setSelectedServer]=useState(null);
-    const [selectedChannel,setSelectedChannel]= useState(null);
     const [newServerName,setNewServerName]= useState('');
     const [newServerDesc,setNewServerDesc]=useState('');
-
     const {servers, getServers,addServer} = useServerStore();
     const [addServerModal,setAddServerModal]=useState(false);
     const {channels,getChannels,addChannel} = useChannelStore();
     const [activeServer,setActiveServer]=useState(null);
+    const [activeCategory,setActiveCategory]=useState(null);
     const {categories,getCategory,addCategory}= useCategoryStore();
-
+    const [activeChannel, setActiveChannel] = useState(null);
+    const [addChannelModal, setAddChannelModal] = useState(false);
+    const [newChannelName, setNewChannelName]= useState('');
+    const [newChannelType, setNewChannelType]= useState('text');
+ 
 
     useEffect(()=>{
         getServers()
@@ -49,33 +51,69 @@ const Sidebar=()=>{
         setAddServerModal(false);
     }
 
+    const handleAddChannel = async()=>{
+        if(newChannelName.trim() && activeCategory?._id){
+            await addChannel(activeCategory._id,{
+                name: newChannelName,
+                type: newChannelType
+            });
+        }
+        setNewChannelName('');
+        setNewChannelType('');
+        setAddChannelModal(false);
+    }
+
     const handleServerSwitch=(server)=>{
         setActiveServer(server);
     }
 
+    const handleChannelSwitch= (channel)=>{
+        setActiveChannel(channel);
+    }
+
     const CategoryHeader = ({ category }) => (
-        <div className="flex items-center justify-between px-2 py-2 mx-2 mt-4">
+        <div className="flex items-center justify-between px-2 py-2 mx-2">
         <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
-            {category}
+            {category.name}
         </span>
         <Plus
-            className="w-4 h-4 text-gray-400 hover:text-gray-200 cursor-pointer"
+            className="w-4 h-4 text-gray-400 hover:text-gray-200 cursor-pointer" onClick={()=>{setActiveCategory(category),setAddChannelModal(true)}}
         />
         </div>
     );
 
-const ChannelItem = ({ channel }) => (
-    <div
-      className={'flex items-center px-2 py-1.5 mx-2 rounded cursor-pointer transition-colors group bg-gray-600 text-white'}
-    >
-      {channel.type === 'text' ? (
-        <Hash className="w-4 h-4 mr-2" />
-      ) : (
-        <Volume2 className="w-4 h-4 mr-2" />
-      )}
-      <span className="text-sm truncate">{channel.name}</span>
-    </div>
-  );
+    const ChannelItem = ({ channel, activeChannel, onClick }) => {
+        const isActive = activeChannel?._id === channel?._id
+
+        return (
+            <div
+            onClick={onClick}
+            className={`flex items-center px-2 py-1.5 mx-2 rounded cursor-pointer transition-colors group 
+                ${isActive ? "bg-gray-600 text-white" : " text-white hover:bg-gray-500"}`}
+            >
+            {channel.type === "text" ? (
+                <Hash className="w-4 h-4 mr-2" />
+            ) : (
+                <Volume2 className="w-4 h-4 mr-2" />
+            )}
+            <span className="text-sm truncate">{channel.name}</span>
+            </div>
+        )
+    }
+
+    const ServerHeader= ({server})=>{
+        return(
+            <div className="flex items-center justify-between px-1 py-1 mx-2 ">
+                <span className="text-white font-bold  text-xl group-hover:text-gray-100">
+                    {server?.name || "Direct Message"}
+                </span>
+
+                <ChevronsUpDown className="w-4 h-4 text-gray-400 hover:text-gray-200 cursor-pointer" />
+            </div>
+        )
+    }
+
+
 
     return(
         <div className='flex h-screen'>
@@ -129,18 +167,52 @@ const ChannelItem = ({ channel }) => (
             )}
             <div className="w-64 bg-gray-800 text-white flex flex-col mt-15">
                 <div className='p-4 border-b border-gray-700'>
-                    <h2 className='text-lg font-semibold text-white'>{activeServer?.name || 'Direct Message'}</h2>
+                    <ServerHeader server={activeServer}/>
                 </div>
                 <div className="flex-1 overflow-y-auto pt-2">
                 {categories?.map(cat=>(
                     <div key={cat._id} >
-                            <CategoryHeader category ={cat.name}/>
+                            <CategoryHeader category ={cat}/>
                             {channels[cat._id]?.map(ch=>(
-                                    <ChannelItem key={ch._id} channel={ch}/>
+                                    <ChannelItem key={ch._id} channel={ch} activeChannel={activeChannel} onClick={() => handleChannelSwitch(ch)}/>
                             ))}
                     </div>
                 ))}
             </div>
+            {addChannelModal && (
+                <div className="absolute inset-0 bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-gray-700 p-6 rounded-lg w-96">
+                        <h3 className='text-lg font-semibold mb-4 text-white'>Create a New Channel</h3>
+                        <div className='mb-4'>
+                            <label className='block item-sm font-medium mb-2 text-white'>Channel Name</label>
+                            <input type='text' value={newChannelName} onChange={(e)=> setNewChannelName(e.target.value)}
+                             className="w-full p-2 bg-gray-600 rounded border border-gray-500 text-white" placeholder='Enter the Chanel Name' />
+                        </div>
+                         <div className="mb-4">
+                            <label className="block text-sm font-medium mb-2 text-white">
+                                Type
+                            </label>
+                            <select
+                                value={newChannelType}
+                                onChange={(e) => setNewChannelType(e.target.value)}
+                                className="w-full p-2 bg-gray-600 rounded border border-gray-500 text-white"
+                            >
+                                <option value="text">Text</option>
+                                <option value="voice">Voice</option>
+                            </select>
+                        </div>
+                        <div className='flex justify-end space-x-3'>
+                            <button onClick={()=>setAddChannelModal(false)} className="px-4 py-2 bg-gray-600 rounded hover:bg-gray-500 transition-colors">
+                                Cancel
+                            </button>
+
+                            <button onClick={handleAddChannel} className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500 transition-colors">
+                                Create Channel 
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             </div>
             
         </div>

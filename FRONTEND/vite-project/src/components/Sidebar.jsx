@@ -1,8 +1,8 @@
 import React,{useState} from 'react';
-import { Hash, Volume2, Plus, Settings, Mic, MicOff, Headphones, PlusIcon, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { Hash, Volume2, Plus, Settings, Mic, MicOff, Headphones, PlusIcon, ChevronDown, ChevronsUpDown, Users, LogOut } from 'lucide-react';
 import {useAuthStore} from '../store/useAuthStore.js';
 import {useServerStore} from '../store/useServerStore.js' 
-import { useEffect } from 'react';
+import { useEffect,useRef    } from 'react';
 import { useChannelStore } from '../store/useChannelStore.js';
 import {useCategoryStore} from '../store/useCategoryStore.js';
 
@@ -19,12 +19,16 @@ const Sidebar=()=>{
     const [addChannelModal, setAddChannelModal] = useState(false);
     const [newChannelName, setNewChannelName]= useState('');
     const [newChannelType, setNewChannelType]= useState('text');
+    const [openServerMenu, setOpenServerMenu] = useState(false);
+    const [newCategoryName,setNewCategoryName]=useState('');
+    const [addCategoryModal, setAddCategoryModal]=useState(false);
  
 
     useEffect(()=>{
         getServers()
     },[]);
 
+    const menuRef = useRef(null);
     useEffect(() => {
         if (activeServer?._id) {
             getCategory(activeServer._id)
@@ -32,11 +36,30 @@ const Sidebar=()=>{
     }, [activeServer]);
 
     useEffect(() => {
-    categories?.forEach(cat => {
-      getChannels(cat._id); 
-    });
-  }, [categories]);
+        categories?.forEach(cat => {
+        getChannels(cat._id); 
+        });
+    }, [categories]);
 
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+        if (menuRef.current && !menuRef.current.contains(event.target)) {
+            setOpenServerMenu(false);
+        }
+        };
+
+        if (openServerMenu) {
+        document.addEventListener("mousedown", handleClickOutside);
+        } else {
+        document.removeEventListener("mousedown", handleClickOutside);
+        }
+
+        
+        return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [openServerMenu]);
 
     const handleAddServer= async ()=>{
         if(newServerName.trim() && newServerDesc.trim()){
@@ -61,6 +84,16 @@ const Sidebar=()=>{
         setNewChannelName('');
         setNewChannelType('');
         setAddChannelModal(false);
+    }
+
+    const handleAddCategory= async()=>{
+        if(newCategoryName.trim() && activeServer?._id){
+            await addCategory(activeServer._id,{
+                name: newCategoryName
+            });
+        }
+        setNewCategoryName('');
+        setAddCategoryModal(false);
     }
 
     const handleServerSwitch=(server)=>{
@@ -108,11 +141,19 @@ const Sidebar=()=>{
                     {server?.name || "Direct Message"}
                 </span>
 
-                <ChevronsUpDown className="w-4 h-4 text-gray-400 hover:text-gray-200 cursor-pointer" />
+                <ChevronsUpDown className="w-4 h-4 text-gray-400 hover:text-gray-200 cursor-pointer" onClick={() => setOpenServerMenu(prev => !prev)}/>
             </div>
         )
     }
 
+    const menuItems = [
+    { icon: Plus ,label: 'Add Category', action:  ()=>setAddCategoryModal(true) },
+    { icon: Settings, label: 'Settings', action: () => console.log('Settings clicked') },
+    { icon: Users, label: 'Invite Friends', action: () => console.log('Invite clicked') },
+    { icon: LogOut, label: 'Leave Server', action: () => console.log('Leaving Server') },
+  ];
+
+  
 
 
     return(
@@ -121,7 +162,6 @@ const Sidebar=()=>{
                 <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-500 transition-colors mt-15 overflow-auto">
                     <span className="text-white font-bold">DM</span>
                 </div>
-
                 {servers.map(server=>(
                     <div 
                         key={server._id}
@@ -169,6 +209,26 @@ const Sidebar=()=>{
                 <div className='p-4 border-b border-gray-700'>
                     <ServerHeader server={activeServer}/>
                 </div>
+                {openServerMenu && (
+                <div ref={menuRef} className="absolute left-70  mt-15 w-52 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    {menuItems.map((item, index) => {
+                        const Icon= item.icon;
+                    return (
+                        <button
+                        key={index}
+                        onClick={() => {
+                            item.action();
+                            setOpenServerMenu(false);
+                        }}
+                        className="w-full flex items-center px-4 py-3 text-left text-gray-700 hover:bg-gray-50 transition-colors duration-150 group"
+                        >
+                        <Icon className="w-4 h-4 mr-3 text-gray-500 group-hover:text-gray-700" />
+                        <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                    );
+                    })}
+                </div>
+                )}
                 <div className="flex-1 overflow-y-auto pt-2">
                 {categories?.map(cat=>(
                     <div key={cat._id} >
@@ -213,13 +273,32 @@ const Sidebar=()=>{
                     </div>
                 </div>
             )}
+            {addCategoryModal && (
+                <div className="absolute inset-0 bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-gray-700 p-6 rounded-lg w-96">
+                        <h3 className='text-lg font-semibold mb-4 text-white'>Create a New Category</h3>
+                        <div className='mb-4'>
+                            <label className='block item-sm font-medium mb-2 text-white'>Category Name</label>
+                            <input type='text' value={newCategoryName} onChange={(e)=> setNewCategoryName(e.target.value)}
+                             className="w-full p-2 bg-gray-600 rounded border border-gray-500 text-white" placeholder='Enter the Category Name' />
+                        </div>
+                         
+                        <div className='flex justify-end space-x-3'>
+                            <button onClick={()=>setAddCategoryModal(false)} className="px-4 py-2 bg-gray-600 rounded hover:bg-gray-500 transition-colors">
+                                Cancel
+                            </button>
+
+                            <button onClick={handleAddCategory} className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500 transition-colors">
+                                Create Category
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             </div>
             
         </div>
     )
-
-    
-
 }
 
 export default Sidebar;

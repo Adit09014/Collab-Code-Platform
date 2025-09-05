@@ -127,3 +127,27 @@ export const checkAuth = async (req,res)=>{
         res.status(500).json({message: "Internal Server Error"});
     }
 }
+
+export const addFriend = async (req,res)=>{
+    const {userId}= req.params;
+    try {
+        const myId= req.user._id;
+
+        if(!userId){
+            return res.status(400).json({message:"Friend Id is Required."})
+        }
+
+        if (myId.toString() === userId) {
+            return res.status(400).json({ message: "You cannot add yourself as a friend." });
+        }
+
+        await User.findByIdAndUpdate(myId,{$addToSet:{friends:{user: userId}}});
+        await User.findByIdAndUpdate(userId,{$addToSet:{friends:{user:myId}}});
+
+        res.status(200).json({ message: "Friend added successfully!" });
+    }
+    catch (err) {
+        console.log("Error in addFriend controller",err.message);
+        res.status(500).json({message: "Internal Server Error"});
+    }
+}

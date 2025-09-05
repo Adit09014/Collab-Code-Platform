@@ -5,6 +5,8 @@ import {useServerStore} from '../store/useServerStore.js'
 import { useEffect,useRef    } from 'react';
 import { useChannelStore } from '../store/useChannelStore.js';
 import {useCategoryStore} from '../store/useCategoryStore.js';
+import {useChatStore} from '../store/useChatStore.js';
+import { Link, useNavigate,useLocation } from "react-router-dom";
 
 const Sidebar=()=>{
     const [newServerName,setNewServerName]= useState('');
@@ -22,11 +24,31 @@ const Sidebar=()=>{
     const [openServerMenu, setOpenServerMenu] = useState(false);
     const [newCategoryName,setNewCategoryName]=useState('');
     const [addCategoryModal, setAddCategoryModal]=useState(false);
- 
+    const [openDM,setOpenDM]= useState(false);
+    const {friends,selectedUser,isUserLoading,getUsers,setSelectedUser}=useChatStore();
+
+    const{onlineUsers}= useAuthStore();
+
+    const location= useLocation();
+    const isOnDirectMessage= location.pathname ==='/DirectMessage';
 
     useEffect(()=>{
         getServers()
     },[]);
+
+    useEffect(()=>{
+        setActiveCategory()
+    })
+
+    useEffect(()=>{
+        setOpenDM(isOnDirectMessage);
+        if(isOnDirectMessage){
+            setActiveServer(null);
+            setActiveCategory(null);
+            setActiveChannel(null);
+            getUsers();
+        }
+    },[isOnDirectMessage]);
 
     const menuRef = useRef(null);
     useEffect(() => {
@@ -98,6 +120,13 @@ const Sidebar=()=>{
 
     const handleServerSwitch=(server)=>{
         setActiveServer(server);
+        setActiveCategory(null);
+        setActiveChannel(null);
+        setOpenDM(false);
+        
+        if(isOnDirectMessage){
+            navigate('/');
+        }
     }
 
     const handleChannelSwitch= (channel)=>{
@@ -138,13 +167,24 @@ const Sidebar=()=>{
         return(
             <div className="flex items-center justify-between px-1 py-1 mx-2 ">
                 <span className="text-white font-bold  text-xl group-hover:text-gray-100">
-                    {server?.name || "Direct Message"}
+                    {server?.name || navigate('/DirectMessage')}
                 </span>
 
                 <ChevronsUpDown className="w-4 h-4 text-gray-400 hover:text-gray-200 cursor-pointer" onClick={() => setOpenServerMenu(prev => !prev)}/>
             </div>
         )
     }
+
+    const navigate = useNavigate();
+
+    const handleDM = () => {
+        setActiveServer(null);
+        setActiveCategory(null);
+        setActiveChannel(null);
+        setOpenDM(true);
+        navigate("/DirectMessage");
+    };
+
 
     const menuItems = [
     { icon: Plus ,label: 'Add Category', action:  ()=>setAddCategoryModal(true) },
@@ -160,7 +200,10 @@ const Sidebar=()=>{
         <div className='flex h-screen'>
             <div className='w-16 bg-gray-900 flex flex-col items-center py-3 space-y-2 overflow-auto'>
                 <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-500 transition-colors mt-15 overflow-auto">
-                    <span className="text-white font-bold">DM</span>
+                    <button onClick={handleDM} >
+                        <span className="text-white font-bold">DM</span>
+                    </button>
+
                 </div>
                 {servers.map(server=>(
                     <div 
@@ -205,40 +248,41 @@ const Sidebar=()=>{
                     </div>
                 </div>
             )}
-            <div className="w-64 bg-gray-800 text-white flex flex-col mt-15">
-                <div className='p-4 border-b border-gray-700'>
-                    <ServerHeader server={activeServer}/>
-                </div>
-                {openServerMenu && (
-                <div ref={menuRef} className="absolute left-70  mt-15 w-52 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                    {menuItems.map((item, index) => {
-                        const Icon= item.icon;
-                    return (
-                        <button
-                        key={index}
-                        onClick={() => {
-                            item.action();
-                            setOpenServerMenu(false);
-                        }}
-                        className="w-full flex items-center px-4 py-3 text-left text-gray-700 hover:bg-gray-50 transition-colors duration-150 group"
-                        >
-                        <Icon className="w-4 h-4 mr-3 text-gray-500 group-hover:text-gray-700" />
-                        <span className="text-sm font-medium">{item.label}</span>
-                        </button>
-                    );
-                    })}
-                </div>
-                )}
-                <div className="flex-1 overflow-y-auto pt-2">
-                {categories?.map(cat=>(
-                    <div key={cat._id} >
-                            <CategoryHeader category ={cat}/>
-                            {channels[cat._id]?.map(ch=>(
-                                    <ChannelItem key={ch._id} channel={ch} activeChannel={activeChannel} onClick={() => handleChannelSwitch(ch)}/>
-                            ))}
+            {!openDM && (
+                <div className="w-64 bg-gray-800 text-white flex flex-col mt-15">
+                    <div className='p-4 border-b border-gray-700'>
+                        <ServerHeader server={activeServer}/>
                     </div>
-                ))}
-            </div>
+                    {openServerMenu && (
+                    <div ref={menuRef} className="absolute left-70  mt-15 w-52 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                        {menuItems.map((item, index) => {
+                            const Icon= item.icon;
+                        return (
+                            <button
+                            key={index}
+                            onClick={() => {
+                                item.action();
+                                setOpenServerMenu(false);
+                            }}
+                            className="w-full flex items-center px-4 py-3 text-left text-gray-700 hover:bg-gray-50 transition-colors duration-150 group"
+                            >
+                            <Icon className="w-4 h-4 mr-3 text-gray-500 group-hover:text-gray-700" />
+                            <span className="text-sm font-medium">{item.label}</span>
+                            </button>
+                        );
+                        })}
+                    </div>
+                    )}
+                    <div className="flex-1 overflow-y-auto pt-2">
+                    {categories?.map(cat=>(
+                        <div key={cat._id} >
+                                <CategoryHeader category ={cat}/>
+                                {channels[cat._id]?.map(ch=>(
+                                        <ChannelItem key={ch._id} channel={ch} activeChannel={activeChannel} onClick={() => handleChannelSwitch(ch)}/>
+                                ))}
+                        </div>
+                    ))}
+                </div>
             {addChannelModal && (
                 <div className="absolute inset-0 bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-gray-700 p-6 rounded-lg w-96">
@@ -296,7 +340,45 @@ const Sidebar=()=>{
                 </div>
             )}
             </div>
-            
+            )}
+            {openDM && (
+                <div className="w-85 bg-gray-800 text-white flex flex-col mt-15">
+                    <div className="border-b border-base-300 w-full p-5">
+                        <div className="flex items-center gap-2">
+                            <Users className="size-6" />
+                        <span className="font-medium hidden lg:block">FRIENDS</span>
+                        </div>
+                    </div>
+                    <div className='overflow-y-auto w-full py-3'>
+                        {friends.map((user)=>(
+                            <button key={user._id} onClick={()=> setSelectedUser(user)} 
+                                className={`w-full p-3 flex items-center gap-3 hover:bg-base-300 transition-colors ${selectedUser?._id === user._id ? "bg-base-300 ring-1 ring-base-300" : ""}`}>
+                                    <div className='flex flex-row items-center gap-3'>
+                                        <div className='relative'>
+                                        <img
+                                            src={user.profilePic || "/avatar.jpg"}
+                                            alt={user.name}
+                                            className="size-12 object-cover rounded-full"
+                                        />
+                                        {onlineUsers.includes(user._id) && (
+                                            <span
+                                                className="absolute bottom-0 right-0 size-3 bg-green-500 
+                                                rounded-full ring-2 ring-zinc-900"
+                                            />
+                                        )}
+                                        </div>  
+                                        <div className="hidden lg:block text-left min-w-0">
+                                            <div className="font-medium truncate">{user.fullName}</div>
+                                            <div className="text-sm text-zinc-400">
+                                                {onlineUsers.includes(user._id) ? "Online" : "Offline"}
+                                            </div>
+                                        </div>
+                                    </div>
+                            </button>     
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

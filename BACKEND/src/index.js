@@ -8,12 +8,11 @@ import channelRoutes from './routes/channel.route.js'
 import categoryRoutes from './routes/category.route.js'
 import {connectDB} from './lib/db.js'
 import cors from 'cors'
+import {app,server,io} from './lib/socket.js';
 
 dotenv.config();
 
 const PORT = process.env.PORT ;
-
-const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -29,7 +28,7 @@ app.use("/api/server",serverRoutes)
 app.use("/api/channel",channelRoutes)
 app.use("/api/category",categoryRoutes)
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log("Server is running on port " + PORT);
     connectDB();
 });

@@ -11,6 +11,7 @@ import { useEffect}  from 'react';
 import { Loader } from 'lucide-react';
 import {Toaster} from 'react-hot-toast';
 import Sidebar from './components/Sidebar';
+import DirectMessagePage from './scenes/DirectMessagePage';
 
 
 const App = () => {
@@ -32,17 +33,22 @@ const App = () => {
   }
 
   return (
-    <div>
+    <div className="h-screen flex flex-col">
       
       <Navbar/>
-      {authUser && <Sidebar/>}
-      <Routes>
-        <Route path="/" element= {authUser?  <HomePage/>: <Navigate to="/login"/>} />
-        <Route path="/signup" element= {!authUser ? <Signuppage/> : <Navigate to="/"/>} />
-        <Route path="/login" element= {!authUser ? <LoginPage/> : <Navigate to="/"/> } />
-        <Route path="/profile" element= {<ProfilePage/>} />
-      </Routes>
-      <Toaster/>
+      <div className="flex flex-1 overflow-hidden">
+        {authUser && <Sidebar/>}
+        <main className='flex-1 overflow-y-auto'>
+          <Routes>
+            <Route path="/" element= {authUser?  <HomePage/>: <Navigate to="/login"/>} />
+            <Route path="/DirectMessage" element= {authUser?  <DirectMessagePage/>: <Navigate to="/login"/>} />
+            <Route path="/signup" element= {!authUser ? <Signuppage/> : <Navigate to="/"/>} />
+            <Route path="/login" element= {!authUser ? <LoginPage/> : <Navigate to="/"/> } />
+            <Route path="/profile" element= {<ProfilePage/>} />
+          </Routes>
+        </main>
+      </div>
+        <Toaster/>
     </div>
   )
 }

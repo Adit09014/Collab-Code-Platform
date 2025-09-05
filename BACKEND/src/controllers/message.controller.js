@@ -1,13 +1,19 @@
 import User from '../models/user.js';
 import Message from '../models/message.model.js';
 import cloudinary from '../lib/cloudnary.js'
+import { getReceiverSocketId,io } from '../lib/socket.js';
+
 
 export const getUsers = async (req,res)=>{
     try{
         const loggedinuser = req.user._id
-        const filterUser = await User.find({_id: {$ne : loggedinuser}}).select("-password");
+        const friendUser= await User.findById(loggedinuser).populate("friends.user","-password");
 
-        res.status(200).json(filterUser);
+         if (!friendUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json(friendUser.friends.map(f=>f.user));
     }
     catch(err){
         console.log("Error in getUsers",err.message);
@@ -56,6 +62,12 @@ export const sendMessages= async (req,res)=>{
         });
 
         await newMessage.save();
+
+        const receiverSocketId= getReceiverSocketId(chatId);
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit("newMessage",newMessage);
+        }
+
 
         res.status(201).json(newMessage);
     }

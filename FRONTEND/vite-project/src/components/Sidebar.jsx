@@ -7,6 +7,7 @@ import { useChannelStore } from '../store/useChannelStore.js';
 import {useCategoryStore} from '../store/useCategoryStore.js';
 import {useChatStore} from '../store/useChatStore.js';
 import { Link, useNavigate,useLocation } from "react-router-dom";
+import { useGroupChatStore } from '../store/useGroupChatStore.js';
 
 const Sidebar=()=>{
     const [newServerName,setNewServerName]= useState('');
@@ -26,6 +27,7 @@ const Sidebar=()=>{
     const [addCategoryModal, setAddCategoryModal]=useState(false);
     const [openDM,setOpenDM]= useState(false);
     const {friends,selectedUser,isUserLoading,getUsers,setSelectedUser}=useChatStore();
+    const {selectedChannel, setSelectedChannel} = useGroupChatStore();
 
     const{onlineUsers}= useAuthStore();
 
@@ -46,6 +48,7 @@ const Sidebar=()=>{
             setActiveServer(null);
             setActiveCategory(null);
             setActiveChannel(null);
+            setSelectedChannel(null)
             getUsers();
         }
     },[isOnDirectMessage]);
@@ -122,6 +125,7 @@ const Sidebar=()=>{
         setActiveServer(server);
         setActiveCategory(null);
         setActiveChannel(null);
+        setSelectedChannel(null);
         setOpenDM(false);
         
         if(isOnDirectMessage){
@@ -131,6 +135,7 @@ const Sidebar=()=>{
 
     const handleChannelSwitch= (channel)=>{
         setActiveChannel(channel);
+        setSelectedChannel(channel);
     }
 
     const CategoryHeader = ({ category }) => (
@@ -181,6 +186,7 @@ const Sidebar=()=>{
         setActiveServer(null);
         setActiveCategory(null);
         setActiveChannel(null);
+        setSelectedChannel(null);
         setOpenDM(true);
         navigate("/DirectMessage");
     };

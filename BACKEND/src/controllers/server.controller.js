@@ -64,4 +64,40 @@ export const getServer= async(req,res)=>{
         console.log("Error in getServer",err.message);
         res.status(500).json({message: "Internal Server Error."})
     }
+};
+
+export const addMember= async(req,res)=>{
+    const {serverId,memberId} = req.params;
+    try{
+         const server = await Server.findById(serverId);
+        if (!server) {
+            return res.status(404).json({ message: "Server not found" });
+        }
+
+        const alreadyMember = server.members.some(
+            (m) => m.user.toString() === memberId
+        );
+        if (alreadyMember) {
+            return res.status(400).json({ message: "User already in server" });
+        }
+
+       
+        server.members.push({
+            user: memberId,
+            roles: ["member"], 
+        });
+
+        await server.save();
+
+        const updatedServer = await Server.findById(serverId).populate(
+            "members.user",
+            "-password"
+        );
+
+        res.status(200).json(updatedServer);
+    }
+    catch(err){
+        console.log("Error in addMember",err.message);
+        res.status(500).json({message: "Internal Server Error."})
+    }
 }

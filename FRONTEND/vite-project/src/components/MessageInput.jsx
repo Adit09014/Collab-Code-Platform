@@ -1,14 +1,14 @@
 import React from 'react'
 import { useRef, useState } from "react";
-import { useChatStore } from "../store/useChatStore";
 import { Image, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
+import { useGroupChatStore } from '../store/useGroupChatStore';
 
 const MessageInput = () => {
     const [text, setText] = useState("");
     const [imagePreview, setImagePreview] = useState(null);
     const fileInputRef = useRef(null);
-    const { sendMessages } = useChatStore();
+    const { sendChannelMessages,selectedChannel } = useGroupChatStore();
 
     const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -34,7 +34,7 @@ const MessageInput = () => {
     if (!text.trim() && !imagePreview) return;
 
     try {
-      await sendMessages({
+      await sendChannelMessages(selectedChannel._id,{
         text: text.trim(),
         image: imagePreview,
       });

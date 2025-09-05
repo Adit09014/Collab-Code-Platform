@@ -6,6 +6,7 @@ import messageRoutes from './routes/message.route.js'
 import serverRoutes from './routes/server.route.js'
 import channelRoutes from './routes/channel.route.js'
 import categoryRoutes from './routes/category.route.js'
+import channelMessageRoutes from './routes/groupmessage.route.js'
 import {connectDB} from './lib/db.js'
 import cors from 'cors'
 import {app,server,io} from './lib/socket.js';
@@ -27,6 +28,7 @@ app.use("/api/message",messageRoutes)
 app.use("/api/server",serverRoutes)
 app.use("/api/channel",channelRoutes)
 app.use("/api/category",categoryRoutes)
+app.use("/api/channelmessage",channelMessageRoutes)
 
 server.listen(PORT, () => {
     console.log("Server is running on port " + PORT);

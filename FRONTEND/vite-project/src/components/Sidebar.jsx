@@ -38,9 +38,7 @@ const Sidebar=()=>{
         getServers()
     },[]);
 
-    useEffect(()=>{
-        setActiveCategory()
-    })
+    
 
     useEffect(()=>{
         setOpenDM(isOnDirectMessage);
@@ -103,9 +101,12 @@ const Sidebar=()=>{
         if(newChannelName.trim() && activeCategory?._id){
             await addChannel(activeCategory._id,{
                 name: newChannelName,
-                type: newChannelType
+                type: newChannelType,
             });
         }
+
+        await console.log(newChannelName);
+        await console.log(newChannelType);
         setNewChannelName('');
         setNewChannelType('');
         setAddChannelModal(false);
@@ -144,7 +145,8 @@ const Sidebar=()=>{
             {category.name}
         </span>
         <Plus
-            className="w-4 h-4 text-gray-400 hover:text-gray-200 cursor-pointer" onClick={()=>{setActiveCategory(category),setAddChannelModal(true)}}
+            className="w-4 h-4 text-gray-400 hover:text-gray-200 cursor-pointer" onClick={()=>{setActiveCategory(category) 
+                setAddChannelModal(true)}}
         />
         </div>
     );

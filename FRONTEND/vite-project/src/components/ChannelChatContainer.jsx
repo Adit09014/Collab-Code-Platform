@@ -30,6 +30,10 @@ const ChannelChatContainer = () => {
     return(
         <div className="flex-1 flex flex-col overflow-auto">
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <h2 className="text-2xl font-bold text-center my-4">
+                    Welcome to {selectedChannel.name}
+                </h2>
+
                 {messages.map((message)=>(
                     <div
                         key={message._id}
@@ -69,6 +73,7 @@ const ChannelChatContainer = () => {
             </div>
             <MessageInput/>
         </div>
+        
     );
 
 }

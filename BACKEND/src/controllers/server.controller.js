@@ -26,7 +26,6 @@ export const addServer = async (req, res) => {
 
         await newServer.save();
 
-        // create categories first
         const textCategory = await Category.create({ name: "Text Channel", server: newServer._id });
         const voiceCategory = await Category.create({ name: "Voice Channel", server: newServer._id });
 

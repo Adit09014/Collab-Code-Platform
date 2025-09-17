@@ -1,5 +1,5 @@
 import React,{useState} from 'react';
-import { Hash, Volume2, Plus, Settings, Mic, MicOff, Headphones, PlusIcon, ChevronDown, ChevronsUpDown, Users, LogOut } from 'lucide-react';
+import { Hash, Volume2, Plus, Settings, Mic, MicOff, Headphones, PlusIcon, ChevronDown, ChevronsUpDown, Users, LogOut, CodeXml } from 'lucide-react';
 import {useAuthStore} from '../store/useAuthStore.js';
 import {useServerStore} from '../store/useServerStore.js' 
 import { useEffect,useRef    } from 'react';
@@ -162,8 +162,9 @@ const Sidebar=()=>{
             >
             {channel.type === "text" ? (
                 <Hash className="w-4 h-4 mr-2" />
-            ) : (
+            ) : (channel.type==="voice"?(
                 <Volume2 className="w-4 h-4 mr-2" />
+            ):(<CodeXml className='w-4 h-4 mr-2'/>)
             )}
             <span className="text-sm truncate">{channel.name}</span>
             </div>
@@ -311,6 +312,7 @@ const Sidebar=()=>{
                             >
                                 <option value="text">Text</option>
                                 <option value="voice">Voice</option>
+                                <option value="code">Code</option>
                             </select>
                         </div>
                         <div className='flex justify-end space-x-3'>

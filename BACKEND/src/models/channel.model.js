@@ -8,7 +8,7 @@ const channelSchema = new mongoose.Schema({
     
     type:{
         type: String,
-        enum: ['text','voice'],
+        enum: ['text','voice','code'],
         required: true
     },
     category:{

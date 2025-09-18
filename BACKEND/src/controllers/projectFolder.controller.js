@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Channel from "../models/channel.model.js";
 import Category from "../models/category.model.js";
 import Server from "../models/server.model.js";
@@ -51,12 +52,25 @@ export const addProjectFolder =  async(req,res)=>{
             return res.status(404).json({ message: "Channel not found" });
         }
 
+        const category = await Category.findById(channel.category);
+        if (!category) {
+            return res.status(404).json({ message: "Category not found" });
+        }
+
+        const server = await Server.findOne({
+            _id: category.server,
+            "members.user": req.user._id
+        });
+        if (!server) {
+            return res.status(403).json({ message: "You are not a member of this server." });
+        }
+
         const newFolder= new ProjectFolder({
             foldername,
             channel:channelId
         })
 
-        newFolder.save();
+        await newFolder.save();
 
         res.status(201).json({
             id:newFolder._id,

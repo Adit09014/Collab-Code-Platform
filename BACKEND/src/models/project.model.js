@@ -10,7 +10,7 @@ const ProjectSchema = new mongoose.Schema({
         ref:"ProjectFolder",
         required: true
     },
-    languague:{
+    language:{
         type: String,
         required:true
     }

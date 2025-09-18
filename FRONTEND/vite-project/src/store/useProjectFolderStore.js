@@ -3,7 +3,7 @@ import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
 
 export const useFolderStore= create((set,get)=>({
-    folders:{},
+    folders:[],
 
     getFolders: async(channelId)=>{
         try{

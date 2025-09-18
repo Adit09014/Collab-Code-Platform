@@ -1,6 +1,6 @@
 import React from 'react'
 import NoChatSelected from '../components/NoChatSelected.jsx'
-import ChatContainer from '../components/ChatContainer.jsx'
+import ChatContainer from '../components/DMChatContainer.jsx'
 import {useChatStore} from '../store/useChatStore.js';
 
 

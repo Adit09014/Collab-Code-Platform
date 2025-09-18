@@ -7,7 +7,7 @@ export const useProjectStore= create((set,get)=>({
 
     getProject: async(folderId)=>{
         try{
-            const res = await axiosInstance.get(`/projectFolder/getProject/${folderId}`);
+            const res = await axiosInstance.get(`/project/getProject/${folderId}`);
 
             set(state => ({
                 projects: {
@@ -19,12 +19,12 @@ export const useProjectStore= create((set,get)=>({
             console.log("Fetched Projects:", folderId);
         }
         catch(err){
-            toast.error(err.response?.data?.message || "Something went wrong fetching Projectss");
+            toast.error(err.response?.data?.message || "Something went wrong fetching Projects");
         }
     },
     addProject: async(folderId,data)=>{
         try {
-            const res = await axiosInstance.post(`/projectFolder/addProject/${folderId}`,data);
+            const res = await axiosInstance.post(`/project/addProject/${folderId}`,data);
             set(state => ({
                 projects: {
                     ...state.projects,

@@ -13,6 +13,10 @@ const ProjectSchema = new mongoose.Schema({
     language:{
         type: String,
         required:true
+    },
+    code:{
+        type:String,
+        default:"",
     }
 });
 

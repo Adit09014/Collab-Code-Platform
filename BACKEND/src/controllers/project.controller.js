@@ -4,6 +4,8 @@ import ProjectFolder from "../models/projectFolder.model.js";
 import Channel from "../models/channel.model.js";
 import Category from "../models/category.model.js";
 import Server from "../models/server.model.js";
+import {io} from "../lib/socket.js";
+import { updateProfile } from "./auth.controller.js";
 
 
 export const getProject = async(req,res)=>{
@@ -84,3 +86,45 @@ export const addProject = async(req,res)=>{
         res.status(500).json({ message: "Internal Server Error." });
     }
 }
+
+export const codeChange = async(req,res)=>{
+    const {code} = req.body;
+    const {fileId} = req.params;
+    try{
+        if (!mongoose.Types.ObjectId.isValid(fileId)) {
+            return res.status(400).json({ message:"Invalid fileId."});
+        }
+
+        const updatedFile = await Project.findByIdAndUpdate(fileId,{code},{new:true});
+        if(!updatedFile){
+            return res.status(404).json({message:"File Not Found."});
+        }
+        res.status(200).json({message:"Code Updated Successfully.",file:updatedFile})
+    }
+    catch(err){
+        console.log("Error in codeChange", err.message);
+        res.status(500).json({ message: "Internal Server Error." });
+    }
+}
+
+export const getCode = async(req,res)=>{
+    const {fileId} = req.params;
+
+    try{
+        if (!mongoose.Types.ObjectId.isValid(fileId)) {
+            return res.status(400).json({ message:"Invalid fileId."});
+        }
+
+        const file = await Project.findById(fileId)
+        if(!file){
+            return res.status(404).json({message:"File not Found."})
+        }
+
+        res.status(200).json(file);
+    }
+    catch(err){
+        console.log("Error in getCode", err.message);
+        res.status(500).json({ message: "Internal Server Error." });
+    }
+}
+

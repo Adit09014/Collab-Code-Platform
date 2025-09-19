@@ -8,7 +8,7 @@ import { useProjectStore } from '../store/useProjectStore.js';
 
 const CodeProjectSidebar = () => {
     const {folders,addFolders,getFolders} = useFolderStore();
-    const {projects,addProject,getProject} = useProjectStore();
+    const {projects,addProject,getProject,setSelectedFile} = useProjectStore();
     const [addFolderModal,setAddFolderModal] = useState(false);
     const [newFolderName,setNewFolderName] = useState("");
     const [openServerMenu,setOpenServerMenu] = useState(false);
@@ -17,6 +17,7 @@ const CodeProjectSidebar = () => {
     const [newProjectLanguage,setNewProjectLanguage] = useState("");
     const [addProjectModal,setAddProjectModal] = useState(false);
     const [selectedFolder, setSelectedFolder] = useState(null);
+    const [activeFile,setActiveFile] = useState(null);
 
     const extensions = {
         python: ".py",
@@ -61,6 +62,12 @@ const CodeProjectSidebar = () => {
             getFolders(selectedChannel._id)
         }
     }, [selectedChannel]);
+
+    useEffect(()=>{
+        if(activeFile?._id){
+            setSelectedFile(activeFile._id);
+        }
+    },[activeFile]);
 
     useEffect(() => {
         if (selectedChannel?._id) {
@@ -109,7 +116,9 @@ const CodeProjectSidebar = () => {
                     projects[folder._id].map((project) => (
                         <div
                             key={project._id}
-                            className="px-2 py-1 text-xs text-gray-300 hover:bg-gray-600 rounded cursor-pointer"
+                            className={`px-2 py-1 text-xs ${(project._id === activeFile)?"bg-gray-600 text-white" : " text-white hover:bg-gray-500"}`}
+                            onClick={()=>{setActiveFile(project._id) 
+                                setSelectedFile(project._id)}}
                         >
                             {project.filename}{extensions[project.language] || ""}
                         </div>

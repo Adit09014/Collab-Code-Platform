@@ -25,6 +25,18 @@ app.use(cors({
     credentials:true
 }))
 
+io.on("connection",(socket)=>{
+    console.log("User Connection",socket.id);
+
+    socket.on("codeChanges",({fileId,newCode})=>{
+        socket.broadcast.emit("codeUpdate",{fileId,newCode});
+    });
+
+    socket.on("disconnect",()=>{
+        console.log("User Disconnect:",socket.id);
+    });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/message",messageRoutes)
 app.use("/api/server",serverRoutes)

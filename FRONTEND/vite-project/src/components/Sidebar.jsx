@@ -173,7 +173,7 @@ const Sidebar=()=>{
 
     const ServerHeader= ({server})=>{
         return(
-            <div className="flex items-center justify-between px-1 py-1 mx-2 ">
+            <div className="flex items-center justify-between px-1 py-1 mx-2">
                 <span className="text-white font-bold  text-xl group-hover:text-gray-100">
                     {server?.name || navigate('/DirectMessage')}
                 </span>

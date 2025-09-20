@@ -8,7 +8,7 @@ import { useProjectStore } from '../store/useProjectStore.js';
 
 const CodeProjectSidebar = () => {
     const {folders,addFolders,getFolders} = useFolderStore();
-    const {projects,addProject,getProject,setSelectedFile} = useProjectStore();
+    const {projects,addProject,getProject,setSelectedFile,setSelectedLang} = useProjectStore();
     const [addFolderModal,setAddFolderModal] = useState(false);
     const [newFolderName,setNewFolderName] = useState("");
     const [openServerMenu,setOpenServerMenu] = useState(false);
@@ -66,6 +66,7 @@ const CodeProjectSidebar = () => {
     useEffect(()=>{
         if(activeFile?._id){
             setSelectedFile(activeFile._id);
+            setSelectedLang(activeFile.language);
         }
     },[activeFile]);
 
@@ -118,7 +119,9 @@ const CodeProjectSidebar = () => {
                             key={project._id}
                             className={`px-2 py-1 text-xs ${(project._id === activeFile)?"bg-gray-600 text-white" : " text-white hover:bg-gray-500"}`}
                             onClick={()=>{setActiveFile(project._id) 
-                                setSelectedFile(project._id)}}
+                                setSelectedFile(project._id)
+                                setSelectedLang(project.language);
+                            }}
                         >
                             {project.filename}{extensions[project.language] || ""}
                         </div>
@@ -217,7 +220,7 @@ const CodeProjectSidebar = () => {
                     </label>
                     <select
                     value={newProjectLanguage}
-                    onChange={(e) => setNewProjectLanguage(e.target.value)}
+                    onChange={(e) => setNewProjectLanguage(e.target.value) }
                     className="w-full p-2 bg-gray-600 rounded border border-gray-500 text-white"
                     >
                     <option value="">Select Language</option>

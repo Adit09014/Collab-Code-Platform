@@ -7,6 +7,7 @@ export const useProjectStore= create((set,get)=>({
     projects:{},
     code: null,
     selectedFile:null,
+    selectedLang:null,
 
     getProject: async(folderId)=>{
         try{
@@ -70,5 +71,6 @@ export const useProjectStore= create((set,get)=>({
         }
     },
 
-    setSelectedFile: (selectedFile)=> set({selectedFile})
+    setSelectedFile: (selectedFile)=> set({selectedFile}),
+    setSelectedLang: (selectedLang)=> set({selectedLang}),
 }))

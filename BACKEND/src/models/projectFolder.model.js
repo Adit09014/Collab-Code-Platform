@@ -9,6 +9,11 @@ const ProjectFolderSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Channel",
         required: true
+    },
+    folder:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ProjectFolder",
+        default:null
     }
 });
 

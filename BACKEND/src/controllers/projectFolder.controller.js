@@ -27,8 +27,22 @@ export const getProjectFolder =  async(req,res)=>{
             return res.status(403).json({ message: "You are not a member of this server." });
         }
 
-        const folders = await ProjectFolder.find({channel: channelId});
-        res.status(200).json(folders);
+        const folders = await ProjectFolder.find({channel: channelId}).lean();
+
+        const folderMap = {};
+        folders.forEach(f=>{
+            folderMap[f._id] = {...f,subfolders:[]};
+        });
+
+        const rootFolders = [];
+        folders.forEach(f => {
+            if (f.folder) {
+                folderMap[f.folder]?.subfolders.push(folderMap[f._id]);
+            } else {
+                rootFolders.push(folderMap[f._id]);
+            }
+        });
+        res.status(200).json(rootFolders);
     }
     catch(err){
         console.log("Error in getProjectFolder", err.message);
@@ -37,7 +51,7 @@ export const getProjectFolder =  async(req,res)=>{
 }
 
 export const addProjectFolder =  async(req,res)=>{
-    const {foldername} = req.body;
+    const {foldername,parentFolder} = req.body;
     const {channelId} = req.params;
     try{
         if(!foldername){
@@ -67,7 +81,8 @@ export const addProjectFolder =  async(req,res)=>{
 
         const newFolder= new ProjectFolder({
             foldername,
-            channel:channelId
+            channel:channelId,
+            folder: parentFolder || null
         })
 
         await newFolder.save();

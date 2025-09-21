@@ -17,36 +17,45 @@ const CodeEditor = () =>{
     const {changeCode,selectedFile,getCode,selectedLang} = useProjectStore();
     const [output,setOutput] = useState("")
 
-    useEffect(()=>{
-        const fetchCode = async()=>{
-            if(selectedFile){
-                const fileCode = await getCode(selectedFile);
-                if(fileCode!==undefined && fileCode!==""){
-                    setCode(fileCode);
-                }
-                else{
-                    setCode("Code Here");
-                }
+    useEffect(() => {
+        const joinFile = async () => {
+            if(!socket){
+                return;
             }
-        };
 
-        fetchCode();
-    },[selectedFile,getCode]);
+            socket.emit("joinFile", selectedFile)
+            if(!selectedFile){
+                return;
+            }
+            const fileCode = await getCode(selectedFile)
+                setCode(prev => prev === "Code Here" ? (fileCode || "Code Here") : prev)
+            }
 
-    useEffect(()=>{
+        joinFile()
+    }, [selectedFile, getCode])
+
+    useEffect(() => {
+        const handleInitBuffer = ({ fileId, buffer }) => {
+            if (fileId === selectedFile) {
+                    setCode(buffer)
+            }
+        }
+
         const handleCodeUpdate = ({ fileId, newCode }) => {
             if (fileId === selectedFile) {
-                setCode(newCode);
+                setCode(newCode)
             }
-        };
-        console.log(selectedLang)
+        }
 
-        socket.on("codeUpdate", handleCodeUpdate);
+        socket.on("initBuffer", handleInitBuffer)
+        socket.on("codeUpdate", handleCodeUpdate)
 
         return () => {
-            socket.off("codeUpdate", handleCodeUpdate);
-        };
-    },[selectedFile]);
+            socket.off("initBuffer", handleInitBuffer)
+            socket.off("codeUpdate", handleCodeUpdate)
+            }
+    }, [selectedFile])
+
 
     const handleChange = value =>{
         setCode(value);

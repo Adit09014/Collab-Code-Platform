@@ -18,6 +18,9 @@ const CodeProjectSidebar = () => {
     const [addProjectModal,setAddProjectModal] = useState(false);
     const [selectedFolder, setSelectedFolder] = useState(null);
     const [activeFile,setActiveFile] = useState(null);
+    const [optionModal,setOptionModal] = useState(null);
+    const [addNestedModal,setAddNestedModal] = useState(null);
+    const [newNestedFolder,setNewNestedFolder] = useState("");
 
     const extensions = {
         python: ".py",
@@ -31,9 +34,32 @@ const CodeProjectSidebar = () => {
     };
 
     const handleAddFolder = async()=>{
+        if (!newFolderName.trim()) {
+            toast.error("Folder name is required");
+            return;
+        }
+        
         await addFolders(selectedChannel._id,{
             foldername: newFolderName
         });
+        
+        setAddFolderModal(false);
+        setNewFolderName("");
+    }
+
+    const handleNestedFolder = async(folderId)=>{
+        if (!newNestedFolder.trim()) {
+            toast.error("Folder name is required");
+            return;
+        }
+        
+        await addFolders(selectedChannel._id,{
+            foldername: newNestedFolder,
+            parentFolder: folderId
+        });
+        
+        setAddNestedModal(false);
+        setNewNestedFolder("");
     }
 
     const handleaddProject = async(folder)=>{
@@ -50,6 +76,7 @@ const CodeProjectSidebar = () => {
         setNewProjectName("");
         setNewProjectLanguage("");
     }
+
 
     const menuItems = [
         { icon: Plus ,label: 'Add Folder', action:  ()=>setAddFolderModal(true) },,
@@ -91,7 +118,7 @@ const CodeProjectSidebar = () => {
     const FolderHeader = ({ folder }) => (
         <>
         <div
-            className="flex items-center justify-between px-2 py-2 mx-2 cursor-pointer hover:bg-gray-700 rounded"
+            className="flex items-center justify-between px-2 py-2 mx-2 cursor-pointer hover:bg-gray-700 rounded overflow-auto"
             onClick={() => toggle(folder._id)}
         >
             <div className="flex items-center">
@@ -107,12 +134,18 @@ const CodeProjectSidebar = () => {
             <Plus className="w-3 h-3 text-gray-400" onClick={(e) => {
                 e.stopPropagation(); 
                 setSelectedFolder(folder);
-                setAddProjectModal(true);
+                setOptionModal(true);
             }}/>
             </div>
             <div className='mx-7 border-l'>
+            {openFolder[folder._id] && folder.subfolders?.map((sub, index) => (
+                <FolderHeader key={sub._id || `sub-${index}`} folder={sub} />
+            ))}
+
+
             {openFolder[folder._id] && (
                 <div className="ml-6 mt-2 flex flex-col space-y-1">
+
                     {projects?.[folder._id]?.length > 0 ? (
                     projects[folder._id].map((project) => (
                         <div
@@ -142,17 +175,19 @@ const CodeProjectSidebar = () => {
     return (
         <>
         <div className='flex h-screen'>
-            <div className=' flex w-50 bg-gray-800  flex-col  justify-between py-1 px-1  space-y-2 overflow-auto border-4 border-gray-700'>
+            <div className='flex w-50 bg-gray-800 flex-col py-1 px-1 space-y-2 border-4 border-gray-700 h-screen'>
                 <div className='flex justify-between items-center p-4.5 border-b border-gray-700 w-full '>
                     <p>{selectedChannel ? selectedChannel.name : "Please Select a Channel"}</p>
                     <ChevronsUpDown className="w-4 h-4 text-gray-400 hover:text-gray-200 cursor-pointer" onClick={()=>setOpenServerMenu(true)}/>
                 </div>
-                <div className="flex-1 overflow-y-auto pt-2">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden py-2">
+                    <div className='space-y-1'>
                     {folders[selectedChannel?._id]?.map(folder=>(
                         <div key={folder._id} >
                                 <FolderHeader folder ={folder}/>
                         </div>
                     ))}
+                    </div>
                 </div>
             </div>
         </div>
@@ -194,6 +229,49 @@ const CodeProjectSidebar = () => {
             })}
         </div>
         )}
+        {optionModal &&(
+            <div className="absolute inset-0 flex items-center justify-center z-50">
+            <div className="bg-gray-800 bg-opacity-90 backdrop-blur-lg p-6 rounded-2xl shadow-2xl w-96 border border-gray-600">
+                <h3 className="text-xl font-bold mb-6 text-white text-center">
+                Select an Option
+                </h3>
+
+                <div className="flex flex-col gap-4">
+                <button
+                    onClick={() => {
+                        setAddProjectModal(true)
+                        setOptionModal(false)
+                    }}
+                    className="w-full px-4 py-3 rounded-xl text-green-400 font-medium border border-green-500 
+                    hover:bg-green-500 hover:text-white transition-all duration-200 ease-in-out transform hover:scale-105"
+                >
+                    Create File
+                </button>
+
+                <button
+                    onClick={()=>{
+                        setAddNestedModal(true)
+                        setOptionModal(false)
+                    }}
+                    className="w-full px-4 py-3 rounded-xl text-blue-400 font-medium border border-blue-500
+                    hover:bg-blue-500 hover:text-white transition-all duration-200 ease-in-out transform hover:scale-105"
+                >
+                    Create Folder
+                </button>
+                </div>
+
+                <div className="mt-6 flex justify-center">
+                <button
+                    onClick={() => setOptionModal(false)}
+                    className="text-gray-400 hover:text-red-400 text-sm transition-colors"
+                >
+                    Cancel
+                </button>
+                </div>
+            </div>
+            </div>
+            )
+        }
         {addProjectModal && (
             <div className="absolute inset-0 bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-gray-700 p-6 rounded-lg w-96">
@@ -249,7 +327,24 @@ const CodeProjectSidebar = () => {
                 </div>
             </div>
             )}
-
+            {addNestedModal && (
+                <div className="absolute inset-0 bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-gray-700 p-6 rounded-lg w-96">
+                        <h3 className='text-lg font-semibold mb-4 text-white'>Create a New Folder</h3>
+                        <div className='mb-4'>
+                            <label className='block item-sm font-medium mb-2 text-white'>Folder Name</label>
+                            <input type='text' value={newNestedFolder} onChange={(e)=> setNewNestedFolder(e.target.value)}
+                             className="w-full p-2 bg-gray-600 rounded border border-gray-500 text-white" placeholder='Enter the Folder Name' />
+                        </div>
+                    <button onClick={()=>setAddNestedModal(false)} className="px-4 py-2 bg-gray-600 rounded hover:bg-gray-500 transition-colors">
+                        Cancle
+                    </button>
+                    <button onClick={()=>handleNestedFolder(selectedFolder._id)} className="px-4 py-2 mx-2 bg-blue-600 rounded hover:bg-blue-500 transition-colors">
+                        Create Folder
+                    </button>
+                    </div>
+                </div>
+            )}
         </>
     )
 }

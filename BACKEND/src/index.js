@@ -25,10 +25,20 @@ app.use(cors({
     credentials:true
 }))
 
+const workingBuffers = {};
+
 io.on("connection",(socket)=>{
     console.log("User Connection",socket.id);
+    
+    socket.on("joinFile",(fileId)=>{
+        socket.join(fileId)
+
+        const buffer = workingBuffers[fileId] || ""
+        socket.emit("initBuffer",{fileId,buffer})
+    })
 
     socket.on("codeChanges",({fileId,newCode})=>{
+        workingBuffers[fileId] = newCode
         socket.broadcast.emit("codeUpdate",{fileId,newCode});
     });
 

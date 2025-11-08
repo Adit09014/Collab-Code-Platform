@@ -10,6 +10,8 @@ export const useServerStore = create((set, get) => ({
     isAddingServer: false,
     name: null,
     description: null,
+    Setting:false,
+    ActiveServer:null,
 
     getServers: async () => {
         set({ isServerLoading: true });
@@ -35,6 +37,8 @@ export const useServerStore = create((set, get) => ({
         } finally {
             set({ isAddingServer: false });
         }
-    }
+    },
+
+    setSettings: (Setting,ActiveServer)=> set({Setting,ActiveServer}),
 
 }));

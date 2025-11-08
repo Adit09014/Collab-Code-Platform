@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 const serverSchema= new mongoose.Schema({
     name:{
         type: String,
@@ -26,17 +25,12 @@ const serverSchema= new mongoose.Schema({
         },
         roles:[{
             type: String,
-            default: 'member'
+            ref:'Role'
         }]
     }],
     roles:[{
-        name:{
-            type: String,
-            required:true
-        },
-        permissions:{
-            admin: {type: Boolean, default: false},
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"Role"
     }]
 });
 

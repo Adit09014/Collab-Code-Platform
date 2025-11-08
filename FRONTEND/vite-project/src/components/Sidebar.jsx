@@ -12,7 +12,7 @@ import { useGroupChatStore } from '../store/useGroupChatStore.js';
 const Sidebar=()=>{
     const [newServerName,setNewServerName]= useState('');
     const [newServerDesc,setNewServerDesc]=useState('');
-    const {servers, getServers,addServer} = useServerStore();
+    const {servers, getServers,addServer,Setting,setSettings} = useServerStore();
     const [addServerModal,setAddServerModal]=useState(false);
     const {channels,getChannels,addChannel} = useChannelStore();
     const [activeServer,setActiveServer]=useState(null);
@@ -194,10 +194,18 @@ const Sidebar=()=>{
         navigate("/DirectMessage");
     };
 
+    const handleServerSetting = () => {
+        setSettings(true,activeServer);
+        setActiveCategory(null);
+        setActiveChannel(null);
+        setSelectedChannel(null);
+        navigate("/ServerSetting")
+    };
+
 
     const menuItems = [
     { icon: Plus ,label: 'Add Category', action:  ()=>setAddCategoryModal(true) },
-    { icon: Settings, label: 'Settings', action: () => console.log('Settings clicked') },
+    { icon: Settings, label: 'Settings', action: () =>  handleServerSetting()},
     { icon: Users, label: 'Invite Friends', action: () => console.log('Invite clicked') },
     { icon: LogOut, label: 'Leave Server', action: () => console.log('Leaving Server') },
   ];

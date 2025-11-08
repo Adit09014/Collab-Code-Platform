@@ -2,7 +2,7 @@ import React from 'react'
 import Navbar from './components/Navbar';
 import {Navigate, Route,Routes} from 'react-router-dom';
 import Signuppage from './scenes/Signuppage';
-import HomePage from './scenes/Homepage';
+import HomePage from './scenes/HomePage';
 import LoginPage from './scenes/Loginpage';
 import ProfilePage from './scenes/ProfilePage';
 
@@ -12,11 +12,14 @@ import { Loader } from 'lucide-react';
 import {Toaster} from 'react-hot-toast';
 import Sidebar from './components/Sidebar';
 import DirectMessagePage from './scenes/DirectMessagePage';
+import ServerSetting from './scenes/ServerSetting';
+import { useServerStore } from './store/useServerStore';
 
 
 const App = () => {
 
   const {authUser,checkAuth,isCheckingAuth} = useAuthStore();
+  const {Setting} = useServerStore(); 
 
   useEffect(()=>{
     checkAuth();
@@ -37,7 +40,7 @@ const App = () => {
       
       <Navbar/>
       <div className="flex flex-1 overflow-hidden">
-        {authUser && <Sidebar/>}
+        {authUser && !Setting && <Sidebar/>}
         <main className='flex-1 overflow-y-auto'>
           <Routes>
             <Route path="/" element= {authUser?  <HomePage/>: <Navigate to="/login"/>} />
@@ -45,6 +48,7 @@ const App = () => {
             <Route path="/signup" element= {!authUser ? <Signuppage/> : <Navigate to="/"/>} />
             <Route path="/login" element= {!authUser ? <LoginPage/> : <Navigate to="/"/> } />
             <Route path="/profile" element= {<ProfilePage/>} />
+            <Route path="/ServerSetting/*" element={<ServerSetting/>}/>
           </Routes>
         </main>
       </div>

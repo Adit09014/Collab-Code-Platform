@@ -14,6 +14,7 @@ const roleSchema = new mongoose.Schema({
    "manage_roles",
    "manage_server",
    "kick_members",
+   "ban_members",
    "invite_members"
   ]
  }],

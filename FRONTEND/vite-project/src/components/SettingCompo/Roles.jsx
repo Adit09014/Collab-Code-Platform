@@ -3,7 +3,7 @@ import { useServerStore } from '../../store/useServerStore'
 import { useState } from 'react'
 
 const Roles = () => {
-  const { ActiveServer } = useServerStore()
+  const { ActiveServer,addRole} = useServerStore()
   const [roleModal,setRoleModal] =useState(false);
   const [roleName, setRoleName] = useState("")
   const [selectedPermissions, setSelectedPermissions] = useState([])
@@ -19,6 +19,47 @@ const Roles = () => {
         "ban_members",
         "invite_members"
     ]
+    const handlePermissionChange = (perm) => {
+      setSelectedPermissions((prev) =>
+        prev.includes(perm)
+          ? prev.filter((p) => p !== perm)  
+          : [...prev, perm]
+      );
+    };
+
+    
+
+  const handleSave = async () => {
+    if (!ActiveServer?._id) {
+      console.error('No active server selected')
+      return
+    }
+    if (!roleName.trim()) {
+      
+      console.error('Role name is required')
+      return
+    }
+
+    
+
+    const data = {
+      name: roleName.trim(),
+      permissions: selectedPermissions
+    }
+
+    try {
+      
+      await addRole(ActiveServer._id,data)
+
+      
+      setRoleName('')
+      setSelectedPermissions([])
+      setRoleModal(false)
+    } catch (err) {
+      console.error('Failed to add role', err)
+    }
+  }
+
   
    return (
     <div className='h-screen pt-20'>
@@ -88,6 +129,7 @@ const Roles = () => {
        </button>
        <button
         className='bg-cyan-600 text-white px-3 py-1 rounded-md hover:bg-cyan-700'
+        onClick={handleSave}
        >
         Save
        </button>

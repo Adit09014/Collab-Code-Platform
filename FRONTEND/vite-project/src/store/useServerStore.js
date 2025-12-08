@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 export const useServerStore = create((set, get) => ({
 
     servers: [],
+    roles:[],
     isServerLoading: false,
     isAddingServer: false,
     name: null,
@@ -29,13 +30,23 @@ export const useServerStore = create((set, get) => ({
     addServer: async (data) => {
         set({ isAddingServer: true });
         try {
-            const res = await axiosInstance.post('server/addserver', data);
+            const res = await axiosInstance.post('/server/addserver', data);
             set({ servers: [...get().servers, res.data] });
             toast.success("Successfully added the server.");
         } catch (err) {
             toast.error(err.response?.data?.message || "Error adding server");
         } finally {
             set({ isAddingServer: false });
+        }
+    },
+
+    addRole: async (serverId,data)=>{
+        try{
+            const res= await axiosInstance.post(`server/roles/${serverId}`,data);
+            toast.success("Successfully added the server.");
+        }
+        catch(err){
+            toast.error(err.response?.data?.message || "Error adding roles");
         }
     },
 

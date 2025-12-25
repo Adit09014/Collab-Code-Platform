@@ -5,11 +5,13 @@ import {useAuthStore} from '../store/useAuthStore.js';
 import ChatHeader from './ChatHeader.jsx';
 import MessageInput from './MessageInput.jsx';
 import {formatMessageTime} from '../lib/timeFormat.js';
+import { useServerStore } from '../store/useServerStore.js';
 
 const ChatContainer = () => {
     const {messages, getMessages,isMessageLoading, selectedUser,listenToMessage,shutoffMessage} = useChatStore();
     const {authUser} = useAuthStore();    
     const messageEndRef = useRef(null);
+    const {ActiveServer} = useServerStore();
 
     useEffect(() => {
         if (!selectedUser) return;
@@ -65,7 +67,9 @@ const ChatContainer = () => {
                     </div>
                 ))}
             </div>
-            <MessageInput/>
+            {authUser && 
+                <MessageInput/>
+            }
         </div>
     );
 

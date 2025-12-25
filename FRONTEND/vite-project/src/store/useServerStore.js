@@ -51,5 +51,4 @@ export const useServerStore = create((set, get) => ({
     },
 
     setSettings: (Setting,ActiveServer)=> set({Setting,ActiveServer}),
-
 }));

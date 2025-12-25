@@ -3,6 +3,7 @@ import NoChatSelected from '../components/NoChatSelected.jsx'
 import ChannelChatContainer from '../components/ChannelChatContainer.jsx'
 import CodeProject from '../components/CodeProject.jsx'
 import { useGroupChatStore } from '../store/useGroupChatStore.js'
+import VoiceChat from "../components/VoiceChat.jsx"
 
 const GroupMessagePage = () => {
   const { selectedChannel,server} = useGroupChatStore()
@@ -16,7 +17,10 @@ const GroupMessagePage = () => {
               <NoChatSelected />
             ) : selectedChannel.type === "code" ? (
               <CodeProject />
-            ) : (
+            ) :selectedChannel.type === "voice"?(
+              <VoiceChat/>
+            ) :
+            (
               <ChannelChatContainer />
             )}  
           </div>
